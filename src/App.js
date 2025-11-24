@@ -10,7 +10,7 @@ function App() {
   const handleSubmit = async () => {
     setStatus("처리 중...");
     try {
-      const res = await axios.post("http://backend-server:8000/natural/command", { text: input });
+      const res = await axios.post("http://k8s-ai-manager.default.svc.cluster.local:8000/natural/command", { text: input });
       setStatus(res.data.message || "배포 완료!");
     } catch (err) {
       setStatus("에러 발생: " + err.message);
