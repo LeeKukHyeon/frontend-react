@@ -15,6 +15,7 @@ export default function ChatWindow() {
     setMessages(m => [...m, userMessage]);
 
     const response = await analyzeNaturalText(input);
+    console.log("GPT 분석 결과:", response);
 
     const botMessage = {
       text: "분석이 완료되었습니다. 아래에서 확인하세요!",
