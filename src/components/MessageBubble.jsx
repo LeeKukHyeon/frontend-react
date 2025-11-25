@@ -1,6 +1,6 @@
 export default function MessageBubble({ text, sender }) {
   const isUser = sender === "user";
-//추가
+
   return (
     <div
       style={{
