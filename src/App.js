@@ -3,6 +3,16 @@ import { useState } from "react";
 export default function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [userId, setUserId] = useState("");
+
+    useEffect(() => {
+    let storedId = localStorage.getItem("userId");
+    if (!storedId) {
+      storedId = uuidv4();
+      localStorage.setItem("userId", storedId);
+    }
+    setUserId(storedId);
+  }, []);
 
   const sendMessage = async () => {
     if (!input) return;
@@ -12,7 +22,7 @@ export default function App() {
     const res = await fetch("/api/ci/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: input })
+      body: JSON.stringify({ message: input, user_id: userId })
     });
     const data = await res.json();
     setMessages([...newMessages, { role: "gpt", text: data.message }]);
