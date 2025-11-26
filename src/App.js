@@ -1,37 +1,31 @@
 import React, { useState, useRef, useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 function App() {
-  const [githubUrl, setGithubUrl] = useState("");
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
+  const [sessionId] = useState(uuidv4());
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
 
-  // 자동 스크롤
   useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: "smooth" });
   }, [chatHistory]);
 
   const sendMessage = async (msg) => {
-    if (!githubUrl || !msg) return;
+    if (!msg) return;
     setLoading(true);
-
-    // 사용자 메시지 추가
-    setChatHistory((prev) => [...prev, { role: "user", content: msg }]);
+    setChatHistory(prev => [...prev, { role: "user", content: msg }]);
     setMessage("");
 
     try {
-      const res = await fetch("/api/ci/chat", {
+      const res = await fetch("http://localhost:8000/api/ci/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ github_url: githubUrl, message: msg }),
+        body: JSON.stringify({ session_id: sessionId, message: msg }),
       });
       const data = await res.json();
-
-      // GPT 메시지 추가
-      setChatHistory((prev) => [...prev, { role: "gpt", content: data.message }]);
+      setChatHistory(prev => [...prev, { role: "gpt", content: data.message }]);
     } catch (err) {
       console.error(err);
       alert("GPT 호출 중 오류 발생");
@@ -40,24 +34,12 @@ function App() {
     }
   };
 
-  // 버튼 클릭 이벤트 처리 (대화형 선택)
-  const handleButtonClick = (btnText) => {
-    sendMessage(btnText);
-  };
-
   return (
     <div style={{ maxWidth: "700px", margin: "50px auto", fontFamily: "Arial" }}>
       <h1>K8s AI Manager GPT Chat</h1>
 
-      <input
-        type="text"
-        placeholder="GitHub URL 입력"
-        value={githubUrl}
-        onChange={(e) => setGithubUrl(e.target.value)}
-        style={{ width: "100%", padding: "8px", marginBottom: "10px" }}
-      />
       <textarea
-        placeholder="메시지 입력"
+        placeholder="GitHub URL 포함하여 명령 입력 (예: 깃허브 URL은 https://github.com/user/repo 이고 배포해줘)"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         rows={3}
